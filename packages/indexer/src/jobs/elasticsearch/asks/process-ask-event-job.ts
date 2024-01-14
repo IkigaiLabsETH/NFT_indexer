@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handler";
 
 import { PendingAskEventsQueue } from "@/elasticsearch/indexes/asks/pending-ask-events-queue";
@@ -26,21 +28,21 @@ export class ProcessAskEventJob extends AbstractRabbitMqJobHandler {
   protected async process(payload: ProcessAskEventJobPayload) {
     return;
 
-    const { kind, data } = payload;
+    // const { kind, data } = payload;
 
-    const pendingAskEventsQueue = new PendingAskEventsQueue();
+    // const pendingAskEventsQueue = new PendingAskEventsQueue();
 
-    if (kind === EventKind.SellOrderInactive) {
-      const id = new AskCreatedEventHandler(data.id).getAskId();
+    // if (kind === EventKind.SellOrderInactive) {
+    //   const id = new AskCreatedEventHandler(data.id).getAskId();
 
-      await pendingAskEventsQueue.add([{ info: { id }, kind: "delete" }]);
-    } else {
-      const askDocumentInfo = await new AskCreatedEventHandler(data.id).generateAsk();
+    //   await pendingAskEventsQueue.add([{ info: { id }, kind: "delete" }]);
+    // } else {
+    //   const askDocumentInfo = await new AskCreatedEventHandler(data.id).generateAsk();
 
-      if (askDocumentInfo) {
-        await pendingAskEventsQueue.add([{ info: askDocumentInfo, kind: "index" }]);
-      }
-    }
+    //   if (askDocumentInfo) {
+    //     await pendingAskEventsQueue.add([{ info: askDocumentInfo, kind: "index" }]);
+    //   }
+    // }
   }
 
   public async addToQueue(payloads: ProcessAskEventJobPayload[]) {
