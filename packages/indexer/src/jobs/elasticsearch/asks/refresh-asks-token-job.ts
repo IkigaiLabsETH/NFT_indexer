@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handler";
 import { config } from "@/config/index";
 import * as AsksIndex from "@/elasticsearch/indexes/asks";
@@ -18,24 +20,24 @@ export default class RefreshAsksTokenJob extends AbstractRabbitMqJobHandler {
   persistent = true;
   lazyMode = true;
 
-  protected async process(payload: RefreshAsksTokenJobPayload) {
+  protected async process(_payload: RefreshAsksTokenJobPayload) {
     return;
 
-    let addToQueue = false;
+    // let addToQueue = false;
 
-    const { contract, tokenId } = payload;
+    // const { contract, tokenId } = payload;
 
-    const tokenData = await Tokens.getByContractAndTokenId(contract, tokenId);
+    // const tokenData = await Tokens.getByContractAndTokenId(contract, tokenId);
 
-    if (!_.isEmpty(tokenData)) {
-      const keepGoing = await AsksIndex.updateAsksTokenData(contract, tokenId, tokenData);
+    // if (!_.isEmpty(tokenData)) {
+    //   const keepGoing = await AsksIndex.updateAsksTokenData(contract, tokenId, tokenData);
 
-      if (keepGoing) {
-        addToQueue = true;
-      }
-    }
+    //   if (keepGoing) {
+    //     addToQueue = true;
+    //   }
+    // }
 
-    return { addToQueue };
+    // return { addToQueue };
   }
 
   public async onCompleted(message: RabbitMQMessage, processResult: { addToQueue: boolean }) {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handler";
 import { config } from "@/config/index";
 import * as AsksIndex from "@/elasticsearch/indexes/asks";
@@ -17,24 +19,24 @@ export default class RefreshAsksCollectionJob extends AbstractRabbitMqJobHandler
   persistent = true;
   lazyMode = true;
 
-  protected async process(payload: RefreshAsksCollectionJobPayload) {
+  protected async process(_payload: RefreshAsksCollectionJobPayload) {
     return;
 
-    let addToQueue = false;
+    // let addToQueue = false;
 
-    const { collectionId } = payload;
+    // const { collectionId } = payload;
 
-    const collectionData = await Collections.getById(collectionId);
+    // const collectionData = await Collections.getById(collectionId);
 
-    if (!_.isEmpty(collectionData)) {
-      const keepGoing = await AsksIndex.updateAsksCollectionData(collectionId, collectionData);
+    // if (!_.isEmpty(collectionData)) {
+    //   const keepGoing = await AsksIndex.updateAsksCollectionData(collectionId, collectionData);
 
-      if (keepGoing) {
-        addToQueue = true;
-      }
-    }
+    //   if (keepGoing) {
+    //     addToQueue = true;
+    //   }
+    // }
 
-    return { addToQueue };
+    // return { addToQueue };
   }
 
   public async onCompleted(message: RabbitMQMessage, processResult: { addToQueue: boolean }) {
