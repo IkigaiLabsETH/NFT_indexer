@@ -67,6 +67,9 @@ export const getCollectionActivityV6Options: RouteOptions = {
       excludeSpam: Joi.boolean()
         .default(false)
         .description("If true, will filter any activities marked as spam."),
+      excludeNsfw: Joi.boolean()
+        .default(false)
+        .description("If true, will filter any activities marked as nsfw."),
       limit: Joi.number()
         .integer()
         .min(1)
@@ -136,6 +139,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
             tokenName: Joi.string().allow("", null),
             tokenImage: Joi.string().allow("", null),
             isSpam: Joi.boolean().allow("", null),
+            isNsfw: Joi.boolean().allow("", null),
             rarityScore: Joi.number().allow(null),
             rarityRank: Joi.number().allow(null),
           }),
@@ -144,6 +148,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
             collectionName: Joi.string().allow("", null),
             collectionImage: Joi.string().allow("", null),
             isSpam: Joi.boolean().allow("", null),
+            isNsfw: Joi.boolean().allow("", null),
           }),
           txHash: Joi.string()
             .lowercase()
@@ -240,6 +245,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
           contracts,
           tokens,
           excludeSpam: query.excludeSpam,
+          excludeNsfw: query.excludeNsfw,
           collections: query.collection,
           sortBy: query.sortBy === "eventTimestamp" ? "timestamp" : query.sortBy,
           limit: query.limit,
@@ -304,6 +310,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
                       ? collectionMetadata.image
                       : activity.collection?.image,
                     isSpam: activity.collection?.isSpam,
+                    isNsfw: activity.collection?.isNsfw,
                   },
                   disabledCollectionMetadata[activity.collection?.id ?? ""],
                   activity.contract
@@ -318,6 +325,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
                   name: tokenMetadata ? tokenMetadata.name : activity.token?.name,
                   image: tokenMetadata ? tokenMetadata.image : activity.token?.image,
                   isSpam: activity.token?.isSpam,
+                  isNsfw: activity.token?.isNsfw,
                 },
                 tokenMetadata?.metadata_disabled ||
                   disabledCollectionMetadata[activity.collection?.id ?? ""],
@@ -413,6 +421,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
             token: {
               tokenId: activity.token?.id || null,
               isSpam: activity.token?.isSpam,
+              isNsfw: activity.token?.isNsfw,
               tokenName: query.includeMetadata
                 ? (tokenMetadata ? tokenMetadata.name : activity.token?.name) || null
                 : undefined,
@@ -422,7 +431,7 @@ export const getCollectionActivityV6Options: RouteOptions = {
             },
             collection: {
               collectionId: activity.collection?.id,
-              isSpam: activity.collection?.isSpam,
+              isNsfw: activity.collection?.isNsfw,
               collectionName: query.includeMetadata
                 ? collectionMetadata
                   ? collectionMetadata.name
