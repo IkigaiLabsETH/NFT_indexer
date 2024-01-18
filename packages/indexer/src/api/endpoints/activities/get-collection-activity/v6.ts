@@ -324,8 +324,8 @@ export const getCollectionActivityV6Options: RouteOptions = {
                   tokenId: activity.token?.id,
                   name: tokenMetadata ? tokenMetadata.name : activity.token?.name,
                   image: tokenMetadata ? tokenMetadata.image : activity.token?.image,
-                  isSpam: activity.token?.isSpam,
-                  isNsfw: activity.token?.isNsfw,
+                  isSpam: activity.collection?.isSpam || activity.token?.isSpam,
+                  isNsfw: activity.collection?.isNsfw || activity.token?.isNsfw,
                 },
                 tokenMetadata?.metadata_disabled ||
                   disabledCollectionMetadata[activity.collection?.id ?? ""],
@@ -420,8 +420,8 @@ export const getCollectionActivityV6Options: RouteOptions = {
             contract: activity.contract,
             token: {
               tokenId: activity.token?.id || null,
-              isSpam: activity.token?.isSpam,
-              isNsfw: activity.token?.isNsfw,
+              isSpam: activity.collection?.isSpam || activity.token?.isSpam,
+              isNsfw: activity.collection?.isNsfw || activity.token?.isNsfw,
               tokenName: query.includeMetadata
                 ? (tokenMetadata ? tokenMetadata.name : activity.token?.name) || null
                 : undefined,
