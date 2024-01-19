@@ -759,7 +759,9 @@ export const updateAsksTokenData = async (
                 token_is_flagged: Boolean(tokenData.isFlagged),
                 token_is_spam: Number(tokenData.isSpam) > 0,
                 token_rarity_rank: tokenData.rarityRank ?? null,
-                token_attributes: tokenData.attributes ?? null,
+                token_attributes: tokenData.attributes
+                  ? JSON.stringify(tokenData.attributes)
+                  : null,
               },
             },
           },
