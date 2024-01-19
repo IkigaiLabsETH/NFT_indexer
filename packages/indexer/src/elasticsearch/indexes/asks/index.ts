@@ -790,24 +790,22 @@ export const updateAsksTokenData = async (
       } else {
         keepGoing = pendingUpdateDocuments.length === 1000;
 
-        if (config.chainId === 1) {
-          logger.info(
-            "elasticsearch-asks",
-            JSON.stringify({
-              topic: "updateAsksTokenData",
-              message: `Success. contract=${contract}, tokenId=${tokenId}`,
-              data: {
-                contract,
-                tokenId,
-                tokenData,
-              },
-              bulkParams,
-              bulkParamsJSON: JSON.stringify(bulkParams),
-              response,
-              keepGoing,
-            })
-          );
-        }
+        logger.info(
+          "elasticsearch-asks",
+          JSON.stringify({
+            topic: "updateAsksTokenData",
+            message: `Success. contract=${contract}, tokenId=${tokenId}`,
+            data: {
+              contract,
+              tokenId,
+              tokenData,
+            },
+            bulkParams,
+            bulkParamsJSON: JSON.stringify(bulkParams),
+            response,
+            keepGoing,
+          })
+        );
       }
     }
   } catch (error) {
