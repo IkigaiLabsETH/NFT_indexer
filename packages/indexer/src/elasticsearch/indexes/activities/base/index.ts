@@ -46,6 +46,7 @@ export interface ActivityDocument extends BaseDocument {
     fillSourceId?: number;
     washTradingScore: number;
     collectionIsMinting: boolean;
+    collectionMintType: string;
     transferIsAirdrop?: boolean;
   };
   token?: {
@@ -128,6 +129,7 @@ export interface BuildActivityData extends BuildDocumentData {
   event_fill_source_id?: number;
   event_wash_trading_score?: number;
   event_collection_is_minting?: boolean;
+  event_collection_mint_price?: number;
   event_transfer_kind?: string;
   order_id?: string | null;
   order_side?: string;
@@ -196,6 +198,12 @@ export class ActivityBuilder extends DocumentBuilder {
             fillSourceId: data.event_fill_source_id,
             washTradingScore: data.event_wash_trading_score,
             collectionIsMinting: data.event_collection_is_minting,
+            collectionMintType:
+              data.event_collection_mint_price != null
+                ? data.event_collection_mint_price > 0
+                  ? "paid"
+                  : "free"
+                : undefined,
             transferIsAirdrop: data.event_transfer_kind
               ? data.event_transfer_kind === "airdrop"
               : undefined,
