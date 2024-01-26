@@ -12,10 +12,10 @@ import {
   overrideCollectionMetadata,
 } from "../extend";
 import { limitFieldSize } from "./utils";
-import fetch from "node-fetch";
 
 import { logger } from "@/common/logger";
 import { redis } from "@/common/redis";
+import axios from "axios";
 
 export abstract class AbstractBaseMetadataProvider {
   abstract method: string;
@@ -144,16 +144,31 @@ export abstract class AbstractBaseMetadataProvider {
   }
 
   async _getImageMimeType(url: string): Promise<string> {
+    if (url.endsWith(".png")) {
+      return "image/png";
+    }
+    if (url.endsWith(".jpg") || url.endsWith(".jpeg")) {
+      return "image/jpeg";
+    }
+    if (url.endsWith(".gif")) {
+      return "image/gif";
+    }
+    if (url.endsWith(".svg")) {
+      return "image/svg+xml";
+    }
+    if (url.endsWith(".mp4")) {
+      return "video/mp4";
+    }
+
     let imageMimeType = await redis.get(`imageMimeType:${url}`);
 
     if (!imageMimeType) {
       // use fetch
-      imageMimeType = await fetch(url, {
-        method: "HEAD",
-      })
-        .then((res) => {
-          return res.headers.get("content-type") || "";
+      imageMimeType = await axios
+        .head(url, {
+          method: "HEAD",
         })
+        .then((res) => res.headers["content-type"])
         .catch((error) => {
           logger.warn(
             "_getImageMimeType",
@@ -163,8 +178,6 @@ export abstract class AbstractBaseMetadataProvider {
               error,
             })
           );
-
-          return "";
         });
 
       if (imageMimeType) {
@@ -172,7 +185,7 @@ export abstract class AbstractBaseMetadataProvider {
       }
     }
 
-    return imageMimeType;
+    return imageMimeType || "";
   }
 
   // Internal methods for subclasses
