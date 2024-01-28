@@ -7,7 +7,13 @@ import { metadataIndexingBaseProvider } from "@/common/provider";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { logger } from "@/common/logger";
 import { ethers } from "ethers";
-import { RequestWasThrottledError, normalizeLink, normalizeMetadata } from "./utils";
+import {
+  RequestWasThrottledError,
+  normalizeLink,
+  normalizeMetadata,
+  TokenUriNotFoundError,
+  TokenUriRequestTimeoutError,
+} from "./utils";
 import _ from "lodash";
 import { AbstractBaseMetadataProvider } from "./abstract-base-metadata-provider";
 import { getNetworkName } from "@/config/network";
@@ -41,12 +47,20 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
             token.tokenId
           );
 
-          if (error) {
+          if (!metadata) {
             if (error === 429) {
               throw new RequestWasThrottledError("Request was throttled", 10);
             }
 
-            throw new Error(error);
+            if (error === 504) {
+              throw new TokenUriRequestTimeoutError("Request timed out");
+            }
+
+            if (error === 404) {
+              throw new TokenUriNotFoundError("Not found");
+            }
+
+            throw new Error(error || "Unknown error");
           }
 
           return {
@@ -183,6 +197,8 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
                 idToToken[token.id].contract
               }/${idToToken[token.id].tokenId}`;
             }
+          } else if (uri.endsWith("/{id}")) {
+            uri = uri.replace("{id}", idToToken[token.id].tokenId);
           }
 
           return {
@@ -554,6 +570,14 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
       uri = uri.replace("gateway.pinata.cloud", "ipfs.io");
     }
 
+    if (uri && uri?.includes("alienworlds.pinata.cloud")) {
+      uri = uri.replace("alienworlds.pinata.cloud", "ipfs.io");
+    }
+
+    if (uri && uri?.includes("metaid.zkbridge.com")) {
+      uri = uri.replace("metaid.zkbridge.com", "ipfs.io");
+    }
+
     return uri;
   }
 
@@ -576,6 +600,11 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
 
       uri = uri.trim();
 
+      if (!uri.startsWith("http")) {
+        // if the uri is not a valid url, return null
+        return [null, "Invalid URI"];
+      }
+
       return axios
         .get(uri, {
           headers: {
@@ -593,7 +622,7 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
           logger.warn(
             "onchain-fetcher",
             JSON.stringify({
-              message: "getTokenMetadataFromURI axios error",
+              message: `getTokenMetadataFromURI axios error. contract=${contract}, tokenId=${tokenId}`,
               contract,
               tokenId,
               uri,
@@ -603,7 +632,7 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
             })
           );
 
-          return [null, error.response?.status];
+          return [null, error.response?.status || `${error}`];
         });
     } catch (error) {
       logger.warn(
