@@ -48,14 +48,11 @@ export default class MetadataIndexFetchJob extends AbstractRabbitMqJobHandler {
       return;
     }
 
-    if (
-      (payload.context === "onchain-fallback" || payload.context === "IndexerTokensHandler") &&
-      payload.kind === "single-token"
-    ) {
+    if (payload.data.collection === "0x4b15a9c28034dc83db40cd810001427d3bd7163d") {
       logger.info(
         this.queueName,
         JSON.stringify({
-          message: `Start. contract=${payload.data.contract}, tokenId=${payload.data.tokenId}`,
+          message: `Start. collection=${payload.data.collection}`,
           payload,
         })
       );
@@ -71,13 +68,21 @@ export default class MetadataIndexFetchJob extends AbstractRabbitMqJobHandler {
         "0x23581767a106ae21c074b2276d25e5c3e136a68b",
         "0x4481507cc228fa19d203bd42110d679571f7912e",
         "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+        "0x4b15a9c28034dc83db40cd810001427d3bd7163d",
       ].includes(payload.data.collection)
     ) {
       data.method = "simplehash";
     }
 
     if (kind === "full-collection") {
-      logger.info(this.queueName, `Full collection. data=${JSON.stringify(data)}`);
+      logger.info(
+        this.queueName,
+        JSON.stringify({
+          message: `Full collection. collection=${payload.data.collection}`,
+          data,
+          prioritized,
+        })
+      );
 
       // Get batch of tokens for the collection
       const [contract, tokenId] = data.continuation

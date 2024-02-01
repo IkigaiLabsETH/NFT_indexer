@@ -396,6 +396,7 @@ export const getTokensV8Options: RouteOptions = {
 
     let enableElasticsearchAsks =
       query.sortBy === "floorAskPrice" &&
+      query.sortDirection !== "desc" &&
       !["tokenName", "tokenSetId"].some((filter) => query[filter]);
 
     if (enableElasticsearchAsks && query.continuation) {
@@ -940,9 +941,6 @@ export const getTokensV8Options: RouteOptions = {
       }
 
       if (query.tokenName) {
-        (query as any).tokenNameAsId = query.tokenName;
-        query.tokenName = `%${query.tokenName}%`;
-
         if (isNaN(query.tokenName)) {
           conditions.push(`t.name ILIKE $/tokenName/`);
         } else {
@@ -953,6 +951,9 @@ export const getTokensV8Options: RouteOptions = {
             END
           `);
         }
+
+        (query as any).tokenNameAsId = query.tokenName;
+        query.tokenName = `%${query.tokenName}%`;
       }
 
       if (query.tokenSetId) {
