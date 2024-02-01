@@ -238,6 +238,11 @@ export const NFTXZeroExModule: ChainIdToAddress = {
   [Network.Ethereum]: "0xcd4ebd768ccbe022274506f5e45d14fd90dc5be7",
 };
 
+export const NFTXV3Module: ChainIdToAddress = {
+  [Network.EthereumGoerli]: "0xfe6a828ff94a0f027402a56711f71526593422e5",
+  [Network.EthereumSepolia]: "0x38c3ba8ec5ff1767ec6a7258da47d8079f1db227",
+};
+
 export const RaribleModule: ChainIdToAddress = {
   [Network.Ethereum]: "0x0ac4aa4e2b50b9a1638c046f2564a6552427d9e4",
   [Network.EthereumGoerli]: "0x0ac4aa4e2b50b9a1638c046f2564a6552427d9e4",
