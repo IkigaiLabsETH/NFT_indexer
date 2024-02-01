@@ -2489,7 +2489,7 @@ export class Router {
 
           // Attach the Execute Swap calldata
           const { executeCallData, price } = await order.getQuote(
-            500,
+            5,
             this.provider,
             this.options!.nftxApiKey!
           );
