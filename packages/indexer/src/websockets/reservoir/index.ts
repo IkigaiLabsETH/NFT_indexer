@@ -34,13 +34,13 @@ if (
       const message = data.toString();
       const messageJson = JSON.parse(message);
 
-      logger.info(
-        "reservoir-websocket",
-        JSON.stringify({
-          topic: "debugMissingSaleWsEvents",
-          message: `Received message: ${message}`,
-        })
-      );
+      // logger.info(
+      //   "reservoir-websocket",
+      //   JSON.stringify({
+      //     topic: "debugMissingSaleWsEvents",
+      //     message: `Received message: ${message}`,
+      //   })
+      // );
 
       if (messageJson.status === "ready") {
         ws.send(
