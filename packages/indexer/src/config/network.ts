@@ -1140,6 +1140,8 @@ export const getNetworkSettings = (): NetworkSettings => {
           ...defaultNetworkSettings.supportedBidCurrencies,
           // PaymentProcessor WETH
           "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": true,
+          // USDC
+          "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": true,
         },
         whitelistedCurrencies: new Map([
           [
@@ -1696,7 +1698,7 @@ export const getNetworkSettings = (): NetworkSettings => {
     case 204: {
       return {
         ...defaultNetworkSettings,
-        enableWebSocket: true,
+        enableWebSocket: false,
         realtimeSyncMaxBlockLag: 32,
         realtimeSyncFrequencySeconds: 5,
         lastBlockLatency: 5,
