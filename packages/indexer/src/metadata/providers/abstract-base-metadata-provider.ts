@@ -119,17 +119,17 @@ export abstract class AbstractBaseMetadataProvider {
     await Promise.all(
       extendedMetadata.map(async (metadata) => {
         try {
+          const debugMissingTokenImages = await redis.sismember(
+            "missing-token-image-contracts",
+            metadata.contract
+          );
+
           if (
             metadata.imageUrl &&
             !metadata.imageUrl.startsWith("data:") &&
             !metadata.imageMimeType
           ) {
             metadata.imageMimeType = await this._getImageMimeType(metadata.imageUrl);
-
-            const debugMissingTokenImages = await redis.sismember(
-              "missing-token-image-contracts",
-              metadata.contract
-            );
 
             if (debugMissingTokenImages) {
               logger.info(
@@ -150,7 +150,7 @@ export abstract class AbstractBaseMetadataProvider {
               logger.warn(
                 "getTokensMetadata",
                 JSON.stringify({
-                  topic: "debugMissingTokenImages",
+                  topic: debugMissingTokenImages ? "debugMissingTokenImages" : "debugMimeType",
                   message: `Missing image mime type. contract=${metadata.contract}, tokenId=${metadata.tokenId}, imageUrl=${metadata.imageUrl}`,
                   metadata: JSON.stringify(metadata),
                   method: this.method,
@@ -170,7 +170,7 @@ export abstract class AbstractBaseMetadataProvider {
               logger.warn(
                 "getTokensMetadata",
                 JSON.stringify({
-                  topic: "debugMissingTokenImages",
+                  topic: debugMissingTokenImages ? "debugMissingTokenImages" : "debugMimeType",
                   message: `Missing media mime type. contract=${metadata.contract}, tokenId=${metadata.tokenId}, mediaUrl=${metadata.mediaUrl}`,
                   metadata: JSON.stringify(metadata),
                   method: this.method,
@@ -198,7 +198,6 @@ export abstract class AbstractBaseMetadataProvider {
           logger.error(
             "getTokensMetadata",
             JSON.stringify({
-              topic: "debugMissingTokenImages",
               message: `extendedMetadata error. contract=${metadata.contract}, tokenId=${metadata.tokenId}, error=${error}`,
               metadata,
               error,
