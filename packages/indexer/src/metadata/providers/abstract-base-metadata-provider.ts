@@ -249,31 +249,10 @@ export abstract class AbstractBaseMetadataProvider {
         .head(url)
         .then((res) => res.headers["content-type"])
         .catch((error) => {
-          logger.warn(
-            "_getImageMimeType",
-            JSON.stringify({
-              topic: "debugMissingTokenImages",
-              message: `Error. contract=${contract}, tokenId=${tokenId}, url=${url}, error=${error}`,
-              error,
-            })
-          );
-
-          const fallbackToIpfsGateway =
-            contract === "0xcfa2b548db870b7f496808fe028375cc93025b64" &&
-            url.includes("ipfs.io") &&
-            config.ipfsGatewayDomain;
+          const fallbackToIpfsGateway = config.ipfsGatewayDomain && url.includes("ipfs.io");
 
           if (fallbackToIpfsGateway) {
             const ipfsGatewayUrl = url.replace("ipfs.io", config.ipfsGatewayDomain);
-
-            logger.info(
-              "_getImageMimeType",
-              JSON.stringify({
-                topic: "debugMissingTokenImages",
-                message: `Fallback To Ipfs Gateway. contract=${contract}, tokenId=${tokenId}, url=${url}, ipfsGatewayUrl=${ipfsGatewayUrl}, error=${error}`,
-                error,
-              })
-            );
 
             return axios
               .head(ipfsGatewayUrl)
@@ -289,6 +268,15 @@ export abstract class AbstractBaseMetadataProvider {
                   })
                 );
               });
+          } else {
+            logger.warn(
+              "_getImageMimeType",
+              JSON.stringify({
+                topic: "debugMissingTokenImages",
+                message: `Error. contract=${contract}, tokenId=${tokenId}, url=${url}, error=${error}`,
+                error,
+              })
+            );
           }
         });
 
