@@ -17,6 +17,14 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
   persistent = true;
 
   public async process(payload: BackfillTokenAsksJobPayload) {
+    logger.info(
+      this.queueName,
+      JSON.stringify({
+        message: `Start. contract=${payload.contract}, tokenId=${payload.tokenId}`,
+        payload,
+      })
+    );
+
     let nextCursor;
     let query;
 
@@ -32,7 +40,7 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
       }
 
       query = `
-            ${AskCreatedEventHandler.buildBaseQuery(true)}
+            ${AskCreatedEventHandler.buildBaseQuery(payload.onlyActive)}
             AND token_set_id = $/tokenSetId/
             ${continuationFilter}
             ORDER BY created_at, id
@@ -50,12 +58,20 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
         for (const rawResult of rawResults) {
           try {
             const eventHandler = new AskCreatedEventHandler(rawResult.order_id);
-            const askDocument = eventHandler.buildDocument(rawResult);
 
-            askEvents.push({
-              kind: "index",
-              info: { id: eventHandler.getAskId(), document: askDocument },
-            } as AskEvent);
+            if (rawResult.status === "active") {
+              const askDocument = eventHandler.buildDocument(rawResult);
+
+              askEvents.push({
+                kind: "index",
+                info: { id: eventHandler.getAskId(), document: askDocument },
+              } as AskEvent);
+            } else {
+              askEvents.push({
+                kind: "delete",
+                info: { id: eventHandler.getAskId() },
+              } as AskEvent);
+            }
           } catch (error) {
             logger.error(
               this.queueName,
@@ -81,7 +97,6 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
       logger.error(
         this.queueName,
         JSON.stringify({
-          topic: "debugAskIndex",
           message: `Error generating ask documents. error=${error}`,
           error,
           payload,
@@ -125,8 +140,7 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
       logger.info(
         this.queueName,
         JSON.stringify({
-          topic: "debugAskIndex",
-          message: `Indexed ${bulkIndexOps.length} asks. Deleted ${bulkDeleteOps.length} asks`,
+          message: `Done. contract=${payload.contract}, tokenId=${payload.tokenId}, indexedAsks=${bulkIndexOps.length}, deletedAsks=${bulkDeleteOps.length}`,
           payload,
           nextCursor,
           indexName: AskIndex.getIndexName(),
@@ -137,13 +151,27 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
         })
       );
 
-      await backfillTokenAsksJob.addToQueue(payload.contract, payload.tokenId, nextCursor);
+      await backfillTokenAsksJob.addToQueue(
+        payload.contract,
+        payload.tokenId,
+        payload.onlyActive,
+        nextCursor
+      );
+    } else {
+      logger.info(
+        this.queueName,
+        JSON.stringify({
+          message: `No Ask Events. contract=${payload.contract}, tokenId=${payload.tokenId}`,
+          payload,
+        })
+      );
     }
   }
 
   public async addToQueue(
     contract: string,
     tokenId: string,
+    onlyActive: boolean,
     cursor?: {
       createdAt: string;
       id: string;
@@ -157,6 +185,7 @@ export class BackfillTokenAsksJob extends AbstractRabbitMqJobHandler {
       payload: {
         contract,
         tokenId,
+        onlyActive,
         cursor,
       },
     });
@@ -168,6 +197,7 @@ export const backfillTokenAsksJob = new BackfillTokenAsksJob();
 export type BackfillTokenAsksJobPayload = {
   contract: string;
   tokenId: string;
+  onlyActive: boolean;
   cursor?: {
     createdAt: string;
     id: string;
