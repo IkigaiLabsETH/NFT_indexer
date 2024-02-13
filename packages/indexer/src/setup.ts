@@ -60,9 +60,7 @@ const setup = async () => {
     await startKafkaConsumer();
   }
 
-  if (config.chainId !== 1) {
-    await redis.del("missing-token-image-contracts");
-  }
+  await redis.del("simplehash-fallback-debug-tokens");
 };
 
 setup().then(() => start());
