@@ -118,19 +118,6 @@ export class IndexerOrdersHandler extends KafkaEventHandler {
             },
           ]);
         } else if (beforeStatus === "active") {
-          const [, contract, tokenId] = payload.after.token_set_id.split(":");
-
-          logger.info(
-            "IndexerOrdersHandler",
-            JSON.stringify({
-              message: `SellOrderInactive. orderId=${payload.after.id}, contract=${contract}, tokenId=${tokenId}`,
-              topic: "debugStaleAsks",
-              payload,
-              afterStatus,
-              beforeStatus,
-            })
-          );
-
           await processAskEventJob.addToQueue([
             {
               kind: EventKind.SellOrderInactive,
