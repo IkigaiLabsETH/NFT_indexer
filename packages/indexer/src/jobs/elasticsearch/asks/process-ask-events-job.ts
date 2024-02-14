@@ -59,20 +59,17 @@ export default class ProcessAskEventsJob extends AbstractRabbitMqJobHandler {
           refresh: true,
         });
 
-        const indexErrors = response.items.filter((item) => item.index?.status !== 201);
-        const deleteErrors = response.items.filter((item) => item.delete?.status !== 200);
-
-        logger.info(
-          this.queueName,
-          JSON.stringify({
-            topic: "debugStaleAsks",
-            hasErrors: response.errors,
-            response,
-            bulkOps: JSON.stringify(bulkOps),
-            indexErrors: JSON.stringify(indexErrors),
-            deleteErrors: JSON.stringify(deleteErrors),
-          })
-        );
+        if (response.errors) {
+          logger.error(
+            this.queueName,
+            JSON.stringify({
+              topic: "debugStaleAsks",
+              message: "Bulk Response Errors",
+              bulkOps: JSON.stringify(bulkOps),
+              response: JSON.stringify(response),
+            })
+          );
+        }
       } catch (error) {
         logger.error(
           this.queueName,
