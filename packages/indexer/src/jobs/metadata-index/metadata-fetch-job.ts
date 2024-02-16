@@ -49,6 +49,13 @@ export default class MetadataIndexFetchJob extends AbstractRabbitMqJobHandler {
       return;
     }
 
+    if (
+      payload?.context === "onchain-metadata-update-single-token" ||
+      payload?.context === "onchain-metadata-update-batch-tokens"
+    ) {
+      logger.info(`${this.queueName}-debug`, `${payload.context}`);
+    }
+
     const tokenMetadataIndexingDebug = await redis.sismember(
       "metadata-indexing-debug-contracts",
       payload.data.collection
@@ -183,8 +190,14 @@ export default class MetadataIndexFetchJob extends AbstractRabbitMqJobHandler {
     });
   }
 
-  public getIndexingMethod(community?: string | null) {
-    switch (community) {
+  public getIndexingMethod(
+    collection?: { tokenIndexingMethod?: string | null; community: string | null } | null
+  ) {
+    if (collection?.tokenIndexingMethod) {
+      return collection.tokenIndexingMethod;
+    }
+
+    switch (collection?.community) {
       case "sound.xyz":
         return "soundxyz";
     }
