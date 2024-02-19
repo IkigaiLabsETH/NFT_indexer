@@ -37,14 +37,6 @@ export default class ProcessAskEventsJob extends AbstractRabbitMqJobHandler {
           }
 
           if (pendingAskEvent.kind === "delete") {
-            logger.info(
-              this.queueName,
-              JSON.stringify({
-                message: `SellOrderInactive. orderId=${pendingAskEvent.info.id}`,
-                topic: "debugStaleAsks",
-              })
-            );
-
             bulkOps.push({
               delete: {
                 _index: AskIndex.getIndexName(),
