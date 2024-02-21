@@ -45,34 +45,15 @@ if ([1, 11155111].includes(config.chainId) && config.doWebsocketWork && config.d
       } else if (messageJson.event === "token.updated") {
         const eventData = messageJson.data;
 
-        const ts2 = new Date(eventData.timestamp * 1000);
-        const ts3 = new Date(eventData.createdAt);
-        const ts4 = new Date(messageJson.published_at);
-        const ts5 = new Date();
-
         logger.info(
           "reservoir-websocket",
           JSON.stringify({
             topic: "debugMissingTokenNormalizedFloorAskChangedEvents",
-            message: `receivedEvent. collectionId=${eventData.collection?.id},  contract=${eventData.contract}, tokenId=${eventData.tokenId}`,
-            collectionId: eventData.collection?.id,
-            contract: eventData.contract,
-            tokenId: eventData.tokenId,
-            txHash: eventData.txHash,
-            eventData,
-            timestamps: {
-              ts2: ts2.toISOString(),
-              ts3: ts3.toISOString(),
-              ts4: ts4.toISOString(),
-              ts5: ts5.toISOString(),
-            },
-            latencies: {
-              ts2ts3LatencyMs: ts3.getTime() - ts2.getTime(),
-              ts3ts4LatencyMs: ts4.getTime() - ts3.getTime(),
-              ts4ts5LatencyMs: ts5.getTime() - ts4.getTime(),
-              ts3ts5LatencyMs: ts5.getTime() - ts3.getTime(),
-              ts2ts5LatencyMs: ts5.getTime() - ts2.getTime(),
-            },
+            message: `receivedEvent. collectionId=${eventData.token?.collection?.id},  contract=${eventData.token?.contract}, tokenId=${eventData.token?.tokenId}`,
+            collectionId: eventData.token?.collection?.id,
+            contract: eventData.token?.contract,
+            tokenId: eventData.token?.tokenId,
+            eventData: JSON.stringify(eventData),
           })
         );
       }
